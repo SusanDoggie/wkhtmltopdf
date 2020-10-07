@@ -31,18 +31,21 @@ public struct WKHtml2Pdf {
     
     public func generate(pages: [Page]) throws -> Data {
         
-        let process = Process()
-        let stdout = Pipe()
-        process.launchPath = WKHtml2Pdf.binary_path
-        
         let pages = try pages.map { try $0.fileHandler() }
         
-        process.arguments = self.parameters.flatMap { $0.values }
-        process.arguments?.append("-")
-        process.standardOutput = stdout
-        process.launch()
-        
-        return stdout.fileHandleForReading.readDataToEndOfFile()
+        return withExtendedLifetime(pages) {
+            
+            let process = Process()
+            let stdout = Pipe()
+            process.launchPath = WKHtml2Pdf.binary_path
+            
+            process.arguments = self.parameters.flatMap { $0.values }
+            process.arguments?.append("-")
+            process.standardOutput = stdout
+            process.launch()
+            
+            return stdout.fileHandleForReading.readDataToEndOfFile()
+        }
     }
 }
 
@@ -61,6 +64,10 @@ extension WKHtml2Pdf.Page {
         
         deinit {
             try? FileManager.default.removeItem(at: file)
+        }
+        
+        func encode() -> String {
+            return file.path
         }
     }
     
