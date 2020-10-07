@@ -35,7 +35,7 @@ public struct WKHtml2Pdf {
         let stdout = Pipe()
         process.launchPath = WKHtml2Pdf.binary_path
         
-        let pages = try pages.map { try $0.fileHandler() }  
+        let pages = try pages.map { try $0.fileHandler() }
         
         process.arguments = self.parameters.flatMap { $0.values }
         process.arguments?.append("-")
@@ -57,6 +57,10 @@ extension WKHtml2Pdf.Page {
         init(file: URL, parameters: [Parameter]) {
             self.file = file
             self.parameters = parameters
+        }
+        
+        deinit {
+            try? FileManager.default.removeItem(at: file)
         }
     }
     
