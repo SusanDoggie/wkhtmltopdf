@@ -29,11 +29,13 @@ public struct WKHtml2Pdf {
     
     public var parameters: [Parameter] = []
     
-    public func generate(pages: [Page]) -> Data {
+    public func generate(pages: [Page]) throws -> Data {
         
         let process = Process()
         let stdout = Pipe()
         process.launchPath = WKHtml2Pdf.binary_path
+        
+        let pages = try pages.map { try $0.fileHandler() }  
         
         process.arguments = self.parameters.flatMap { $0.values }
         process.arguments?.append("-")
@@ -41,5 +43,30 @@ public struct WKHtml2Pdf {
         process.launch()
         
         return stdout.fileHandleForReading.readDataToEndOfFile()
+    }
+}
+
+extension WKHtml2Pdf.Page {
+    
+    fileprivate class PageFileHandler {
+        
+        let file: URL
+        
+        let parameters: [Parameter]
+        
+        init(file: URL, parameters: [Parameter]) {
+            self.file = file
+            self.parameters = parameters
+        }
+    }
+    
+    fileprivate func fileHandler() throws -> PageFileHandler {
+        
+        let unique_name = ProcessInfo.processInfo.globallyUniqueString
+        let file = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("com.SusanDoggie.wkhtmltopdf.\(unique_name)")
+        
+        try self.html.write(to: file, atomically: true, encoding: .utf8)
+        
+        return PageFileHandler(file: file, parameters: parameters)
     }
 }

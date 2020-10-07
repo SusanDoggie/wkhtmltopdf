@@ -27,5 +27,16 @@ extension WKHtml2Pdf {
     
     public struct Page {
         
+        public var html: String
+        
+        public var parameters: [Parameter] = []
+        
+    }
+}
+
+extension WKHtml2Pdf.Page {
+    
+    public enum Parameter: Equatable {
+        
     }
 }
