@@ -25,7 +25,7 @@
 
 public struct WKHtml2Pdf {
     
-    private static let binary = "/usr/local/bin/wkhtmltopdf"
+    private static let binary_path = "/usr/local/bin/wkhtmltopdf"
     
     public var parameters: [Parameter] = []
     
@@ -33,7 +33,7 @@ public struct WKHtml2Pdf {
         
         let process = Process()
         let stdout = Pipe()
-        process.launchPath = WKHtml2Pdf.binary
+        process.launchPath = WKHtml2Pdf.binary_path
         
         process.arguments = self.parameters.flatMap { $0.values }
         process.arguments?.append("-")
