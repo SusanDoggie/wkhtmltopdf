@@ -43,17 +43,27 @@ public struct WKHtml2Pdf {
             parameters.append(.quiet)
         }
         
-        return withExtendedLifetime(pages) {
+        return try withExtendedLifetime(pages) {
             
             let process = Process()
             let stdout = Pipe()
-            process.launchPath = WKHtml2Pdf.binary_path
+            
+            if #available(macOS 10.13, *) {
+                process.executableURL = URL(fileURLWithPath: WKHtml2Pdf.binary_path)
+            } else {
+                process.launchPath = WKHtml2Pdf.binary_path
+            }
             
             process.arguments = parameters.flatMap { $0.values }
             process.arguments?.append(contentsOf: pages.flatMap { $0.encode() })
             process.arguments?.append("-")
             process.standardOutput = stdout
-            process.launch()
+            
+            if #available(macOS 10.13, *) {
+                try process.run()
+            } else {
+                process.launch()
+            }
             
             return stdout.fileHandleForReading.readDataToEndOfFile()
         }
