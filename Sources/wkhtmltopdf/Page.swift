@@ -27,10 +27,19 @@ extension WKHtml2Pdf {
     
     public struct Page {
         
-        public var html: String
+        public var html: Data
         
-        public var parameters: [Parameter] = []
+        public var parameters: [Parameter]
         
+        public init(html: String, parameters: [Parameter] = []) {
+            self.html = html.data(using: .utf8) ?? Data()
+            self.parameters = parameters
+        }
+        
+        public init(html: Data, parameters: [Parameter] = []) {
+            self.html = html
+            self.parameters = parameters
+        }
     }
 }
 

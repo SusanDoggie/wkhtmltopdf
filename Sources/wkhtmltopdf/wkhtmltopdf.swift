@@ -27,11 +27,21 @@ public struct WKHtml2Pdf {
     
     private static let binary_path = "/usr/local/bin/wkhtmltopdf"
     
-    public var parameters: [Parameter] = []
+    public var parameters: [Parameter]
+    
+    public init(parameters: [Parameter] = []) {
+        self.parameters = parameters
+    }
     
     public func generate(pages: [Page]) throws -> Data {
         
         let pages = try pages.map { try $0.fileHandler() }
+        
+        var parameters = self.parameters
+        
+        if !parameters.contains(.quiet) {
+            parameters.append(.quiet)
+        }
         
         return withExtendedLifetime(pages) {
             
@@ -39,7 +49,8 @@ public struct WKHtml2Pdf {
             let stdout = Pipe()
             process.launchPath = WKHtml2Pdf.binary_path
             
-            process.arguments = self.parameters.flatMap { $0.values }
+            process.arguments = parameters.flatMap { $0.values }
+            process.arguments?.append(contentsOf: pages.flatMap { $0.encode() })
             process.arguments?.append("-")
             process.standardOutput = stdout
             process.launch()
@@ -66,17 +77,17 @@ extension WKHtml2Pdf.Page {
             try? FileManager.default.removeItem(at: file)
         }
         
-        func encode() -> String {
-            return file.path
+        func encode() -> [String] {
+            return [file.path]
         }
     }
     
     fileprivate func fileHandler() throws -> PageFileHandler {
         
         let unique_name = ProcessInfo.processInfo.globallyUniqueString
-        let file = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("com.SusanDoggie.wkhtmltopdf.\(unique_name)")
+        let file = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("com.SusanDoggie.wkhtmltopdf.\(unique_name).html")
         
-        try self.html.write(to: file, atomically: true, encoding: .utf8)
+        try self.html.write(to: file)
         
         return PageFileHandler(file: file, parameters: parameters)
     }
