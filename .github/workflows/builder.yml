@@ -1,0 +1,69 @@
+name: Builder
+on: [push, pull_request]
+jobs:
+  darwin:
+    name: macOS
+    runs-on: macOS-latest
+    env:
+      use_xcodebuild: true
+      sdk: macosx
+      destination: 'platform=macOS'
+      enable_codecov: true
+      DEVELOPER_DIR: /Applications/Xcode_12.app/Contents/Developer
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: recursive
+    - name: Build
+      uses: SusanDoggie/swift-action@master
+      with:
+        action: build
+    - name: Run tests
+      uses: SusanDoggie/swift-action@master
+      with:
+        action: test
+    - uses: codecov/codecov-action@v1
+      if: ${{ matrix.enable_codecov }}
+  macos:
+    name: macOS(SwiftPM)
+    runs-on: macOS-latest
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_12_beta.app/Contents/Developer
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: recursive
+    - name: Install wkhtmltopdf
+      run: brew cask install wkhtmltopdf
+    - name: Build
+      uses: SusanDoggie/swift-action@master
+      with:
+        action: build
+    - name: Run tests
+      uses: SusanDoggie/swift-action@master
+      with:
+        action: test
+  ubuntu_swift_latest:
+    name: latest-${{ matrix.image }}
+    container:
+      image: docker://swift:${{ matrix.image }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: [xenial, bionic, focal]
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        submodules: recursive
+    - name: Prepare		
+      run: apt-get update
+    - name: Install wkhtmltopdf
+      run: apt-get install -y wkhtmltopdf
+    - name: Build
+      uses: SusanDoggie/swift-action@master
+      with:
+        action: build
+    - name: Run tests
+      uses: SusanDoggie/swift-action@master
+      with:
+        action: test
