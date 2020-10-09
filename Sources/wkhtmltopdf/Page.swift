@@ -128,7 +128,7 @@ extension WKHtml2Pdf.Page {
         /// --post-file <name> <path> Post an additional file (repeatable)
         case postFile(name: String, path: String)
         /// --print-media-type Use print media-type instead of screen
-        case printMediaType()
+        case printMediaType
         /// --no-print-media-type Do not use print media-type instead of screen (default)
         case noPrintMediaType
         /// -p, --proxy <proxy> Use a proxy
@@ -246,11 +246,11 @@ extension WKHtml2Pdf.Page {
         var values: [String] {
             var result: [String] = [self.description]
             switch self {
-            case let .allow(path): result.append(path.doubleQuotted)
+            case let .allow(path): result.append("\"\(path)\"")
             case let .bypassProxyFor(v): result.append(v)
-            case let .cacheDir(path): result.append(path.doubleQuotted)
-            case let .checkboxChecked(path): result.append(path.doubleQuotted)
-            case let .checkboxUnchecked(path): result.append(path.doubleQuotted)
+            case let .cacheDir(path): result.append("\"\(path)\"")
+            case let .checkboxChecked(path): result.append("\"\(path)\"")
+            case let .checkboxUnchecked(path): result.append("\"\(path)\"")
             case let .cookie(name, value): result.append(name); result.append(value)
             case let .customHeader(name, value): result.append(name); result.append(value)
             case let .encoding(v): result.append(v)
@@ -261,14 +261,14 @@ extension WKHtml2Pdf.Page {
             case let .pageOffset(v): result.append(String(describing: v))
             case let .password(v): result.append(v)
             case let .postField(name, value): result.append(name); result.append(value)
-            case let .postFile(name, path): result.append(name); result.append(path.doubleQuotted)
+            case let .postFile(name, path): result.append(name); result.append("\"\(path)\"")
             case let .proxy(v): result.append(v)
-            case let .radioButtonChecked(path): result.append(path.doubleQuotted)
-            case let .radioButtonUnchecked(path): result.append(path.doubleQuotted)
+            case let .radioButtonChecked(path): result.append("\"\(path)\"")
+            case let .radioButtonUnchecked(path): result.append("\"\(path)\"")
             case let .runScript(js): result.append(js)
-            case let .sslCrtPath(path): result.append(path.doubleQuotted)
+            case let .sslCrtPath(path): result.append("\"\(path)\"")
             case let .sslKeyPassword(v): result.append(v)
-            case let .sslKeyPath(path): result.append(path.doubleQuotted)
+            case let .sslKeyPath(path): result.append("\"\(path)\"")
             case let .userStyleSheet(url): result.append(url)
             case let .username(v): result.append(v)
             case let .viewportSize(v): result.append(v)
@@ -283,10 +283,6 @@ extension WKHtml2Pdf.Page {
             default: break
             }
             return result
-        }
-        
-        public static func ==(lhs: PageParam, rhs: PageParam) -> Bool {
-            return lhs.key == rhs.key
         }
     }
 }
