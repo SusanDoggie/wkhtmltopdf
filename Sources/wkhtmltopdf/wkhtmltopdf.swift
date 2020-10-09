@@ -27,20 +27,71 @@ public struct WKHtml2Pdf {
     
     private static let binary_path = "/usr/local/bin/wkhtmltopdf"
     
-    public var parameters: [Parameter]
+    public var paperSize: PaperSize?
     
-    public init(parameters: [Parameter] = []) {
-        self.parameters = parameters
-    }
+    public var grayScale: Bool = false
+    
+    public var lowQuality: Bool = false
+    
+    public var orientation: Orientation?
+    
+    public var topMargin: Double?
+    public var rightMargin: Double?
+    public var bottomMargin: Double?
+    public var leftMargin: Double?
+    
+    public var pageWidth: Double?
+    public var pageHeight: Double?
+    
+    public init() { }
     
     public func generate(pages: [Page]) throws -> Data {
         
         let pages = try pages.map { try $0.fileHandler() }
         
-        var parameters = self.parameters
+        var arguments: [String] = ["--quiet"]
         
-        if !parameters.contains(.quiet) {
-            parameters.append(.quiet)
+        if let paperSize = paperSize {
+            arguments.append("-s")
+            arguments.append(paperSize.rawValue)
+        }
+        
+        if grayScale {
+            arguments.append("-g")
+        }
+        if lowQuality {
+            arguments.append("-l")
+        }
+        
+        if let orientation = orientation {
+            arguments.append("-O")
+            arguments.append(orientation.rawValue)
+        }
+        
+        if let topMargin = topMargin {
+            arguments.append("-T")
+            arguments.append("\(topMargin)mm")
+        }
+        if let rightMargin = rightMargin {
+            arguments.append("-R")
+            arguments.append("\(rightMargin)mm")
+        }
+        if let bottomMargin = bottomMargin {
+            arguments.append("-B")
+            arguments.append("\(bottomMargin)mm")
+        }
+        if let leftMargin = leftMargin {
+            arguments.append("-L")
+            arguments.append("\(leftMargin)mm")
+        }
+        
+        if let pageWidth = pageWidth {
+            arguments.append("--page-width")
+            arguments.append("\(pageWidth)mm")
+        }
+        if let pageHeight = pageHeight {
+            arguments.append("--page-height")
+            arguments.append("\(pageHeight)mm")
         }
         
         return try withExtendedLifetime(pages) {
@@ -54,7 +105,7 @@ public struct WKHtml2Pdf {
                 process.launchPath = WKHtml2Pdf.binary_path
             }
             
-            process.arguments = parameters.flatMap { $0.values }
+            process.arguments = arguments
             process.arguments?.append(contentsOf: pages.flatMap { $0.encode() })
             process.arguments?.append("-")
             process.standardOutput = stdout
@@ -67,6 +118,29 @@ public struct WKHtml2Pdf {
             
             return stdout.fileHandleForReading.readDataToEndOfFile()
         }
+    }
+}
+
+extension WKHtml2Pdf {
+    
+    public enum Orientation: String {
+        
+        case Portrait
+        case Landscape
+    }
+    
+    public enum PaperSize: String {
+        case A0, A1, A2, A3, A4, A5, A6, A7, A8, A9
+        case B0, B1, B2, B3, B4, B5, B6, B7, B8, B9, B10
+        case C5E
+        case Comm10E
+        case DLE
+        case Executive
+        case Folio
+        case Ledger
+        case Legal
+        case Letter
+        case Tabloid
     }
 }
 
@@ -88,7 +162,7 @@ extension WKHtml2Pdf.Page {
         }
         
         func encode() -> [String] {
-            return [file.path]
+            return [file.path] + parameters.flatMap { $0.values }
         }
     }
     
