@@ -72,6 +72,36 @@ extension WKHtml2Pdf {
 
 extension WKHtml2Pdf {
     
+    public func generate(pages: [Page]) throws -> Data {
+        
+        let pages = try pages.map { try $0.fileHandler() }
+        
+        return try withExtendedLifetime(pages) {
+            
+            let process = Process()
+            let stdout = Pipe()
+            
+            if #available(macOS 10.13, *) {
+                process.executableURL = URL(fileURLWithPath: WKHtml2Pdf.binary_path)
+            } else {
+                process.launchPath = WKHtml2Pdf.binary_path
+            }
+            
+            process.arguments = self.arguments
+            process.arguments?.append(contentsOf: pages.flatMap { $0.encode() })
+            process.arguments?.append("-")
+            process.standardOutput = stdout
+            
+            if #available(macOS 10.13, *) {
+                try process.run()
+            } else {
+                process.launch()
+            }
+            
+            return stdout.fileHandleForReading.readDataToEndOfFile()
+        }
+    }
+    
     private var arguments: [String] {
         
         var arguments: [String] = ["--quiet"]
@@ -121,36 +151,75 @@ extension WKHtml2Pdf {
         
         return arguments
     }
+}
+
+extension WKHtml2Pdf.Page {
     
-    public func generate(pages: [Page]) throws -> Data {
+    fileprivate var arguments: [String] {
         
-        let pages = try pages.map { try $0.fileHandler() }
+        var arguments: [String] = []
         
-        return try withExtendedLifetime(pages) {
-            
-            let process = Process()
-            let stdout = Pipe()
-            
-            if #available(macOS 10.13, *) {
-                process.executableURL = URL(fileURLWithPath: WKHtml2Pdf.binary_path)
-            } else {
-                process.launchPath = WKHtml2Pdf.binary_path
-            }
-            
-            process.arguments = self.arguments
-            process.arguments?.append(contentsOf: pages.flatMap { $0.encode() })
-            process.arguments?.append("-")
-            process.standardOutput = stdout
-            
-            if #available(macOS 10.13, *) {
-                try process.run()
-            } else {
-                process.launch()
-            }
-            
-            return stdout.fileHandleForReading.readDataToEndOfFile()
+        if !enableBackground {
+            arguments.append("--no-background")
         }
+        
+        if !enableJavaScript {
+            arguments.append("--disable-javascript")
+        }
+        
+        if !enableExternalLinks {
+            arguments.append("--disable-external-links")
+        }
+        
+        if !enableInternalLinks {
+            arguments.append("--disable-internal-links")
+        }
+        
+        if enableForms {
+            arguments.append("--enable-forms")
+        }
+        
+        if let javascriptDelay = javascriptDelay {
+            arguments.append("--javascript-delay")
+            arguments.append("\(javascriptDelay)")
+        }
+        
+        if keepRelativeLinks {
+            arguments.append("--keep-relative-links")
+        }
+        
+        if let loadErrorHandling = loadErrorHandling {
+            arguments.append("--load-error-handling")
+            arguments.append(loadErrorHandling.rawValue)
+        }
+        
+        if let loadMediaErrorHandling = loadMediaErrorHandling {
+            arguments.append("--load-media-error-handling")
+            arguments.append(loadMediaErrorHandling.rawValue)
+        }
+        
+        if enableLocalFileAccess {
+            arguments.append("--enable-local-file-access")
+        }
+        
+        if let minimumFontSize = minimumFontSize {
+            arguments.append("--minimum-font-size")
+            arguments.append("\(minimumFontSize)")
+        }
+        
+        if let pageOffset = pageOffset {
+            arguments.append("--page-offset")
+            arguments.append("\(pageOffset)")
+        }
+        
+        if let zoom = zoom {
+            arguments.append("--zoom")
+            arguments.append("\(zoom)")
+        }
+        
+        return arguments
     }
+    
 }
 
 extension WKHtml2Pdf.Page {
@@ -159,11 +228,11 @@ extension WKHtml2Pdf.Page {
         
         let file: URL
         
-        let parameters: [Parameter]
+        let arguments: [String]
         
-        init(file: URL, parameters: [Parameter]) {
+        init(file: URL, arguments: [String]) {
             self.file = file
-            self.parameters = parameters
+            self.arguments = arguments
         }
         
         deinit {
@@ -171,7 +240,7 @@ extension WKHtml2Pdf.Page {
         }
         
         func encode() -> [String] {
-            return [file.path] + parameters.flatMap { $0.values }
+            return [file.path] + arguments
         }
     }
     
@@ -182,6 +251,6 @@ extension WKHtml2Pdf.Page {
         
         try self.html.write(to: file)
         
-        return PageFileHandler(file: file, parameters: parameters)
+        return PageFileHandler(file: file, arguments: self.arguments)
     }
 }
