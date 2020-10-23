@@ -9,7 +9,6 @@ jobs:
       sdk: macosx
       destination: 'platform=macOS'
       enable_codecov: true
-      DEVELOPER_DIR: /Applications/Xcode_12.app/Contents/Developer
     steps:
     - uses: actions/checkout@v1
       with:
