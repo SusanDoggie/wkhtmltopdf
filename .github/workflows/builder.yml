@@ -14,7 +14,7 @@ jobs:
       with:
         submodules: recursive
     - name: Install wkhtmltopdf
-      run: brew cask install wkhtmltopdf
+      run: brew install --cask wkhtmltopdf
     - name: Build
       uses: SusanDoggie/swift-action@main
       with:
@@ -35,7 +35,7 @@ jobs:
       with:
         submodules: recursive
     - name: Install wkhtmltopdf
-      run: brew cask install wkhtmltopdf
+      run: brew install --cask wkhtmltopdf
     - name: Build
       uses: SusanDoggie/swift-action@main
       with:
