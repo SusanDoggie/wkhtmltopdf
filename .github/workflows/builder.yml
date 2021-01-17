@@ -16,11 +16,11 @@ jobs:
     - name: Install wkhtmltopdf
       run: brew cask install wkhtmltopdf
     - name: Build
-      uses: SusanDoggie/swift-action@master
+      uses: SusanDoggie/swift-action@main
       with:
         action: build
     - name: Run tests
-      uses: SusanDoggie/swift-action@master
+      uses: SusanDoggie/swift-action@main
       with:
         action: test
     - uses: codecov/codecov-action@v1
@@ -37,11 +37,11 @@ jobs:
     - name: Install wkhtmltopdf
       run: brew cask install wkhtmltopdf
     - name: Build
-      uses: SusanDoggie/swift-action@master
+      uses: SusanDoggie/swift-action@main
       with:
         action: build
     - name: Run tests
-      uses: SusanDoggie/swift-action@master
+      uses: SusanDoggie/swift-action@main
       with:
         action: test
   ubuntu_swift_latest:
@@ -61,10 +61,10 @@ jobs:
     - name: Install wkhtmltopdf
       run: apt-get install -y wkhtmltopdf
     - name: Build
-      uses: SusanDoggie/swift-action@master
+      uses: SusanDoggie/swift-action@main
       with:
         action: build
     - name: Run tests
-      uses: SusanDoggie/swift-action@master
+      uses: SusanDoggie/swift-action@main
       with:
         action: test
