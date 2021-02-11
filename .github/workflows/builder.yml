@@ -5,6 +5,7 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: macOS-latest
     strategy:
+      fail-fast: false
       matrix:
         name: [macOS, macOS(SwiftPM)]
         include:
@@ -42,6 +43,7 @@ jobs:
       image: docker://swift:${{ matrix.image }}
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         image: [xenial, bionic, focal]
     steps:
