@@ -33,6 +33,8 @@ public struct WKHtml2Pdf {
     
     private static let binary_path = "/usr/bin/wkhtmltopdf"
     
+    public var useXvfb: Bool = false
+    
     #endif
     
     public var paperSize: PaperSize?
@@ -89,15 +91,30 @@ extension WKHtml2Pdf {
             let process = Process()
             let stdout = Pipe()
             
+            var arguments = self.arguments
+            arguments.append(contentsOf: pages.flatMap { $0.encode() })
+            arguments.append("-")
+            
+            #if os(Linux)
+            
+            if useXvfb {
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/xvfb-run")
+                arguments.insert(WKHtml2Pdf.binary_path, at: 0)
+            } else {
+                process.executableURL = URL(fileURLWithPath: WKHtml2Pdf.binary_path)
+            }
+            
+            #else
+
             if #available(macOS 10.13, *) {
                 process.executableURL = URL(fileURLWithPath: WKHtml2Pdf.binary_path)
             } else {
                 process.launchPath = WKHtml2Pdf.binary_path
             }
             
-            process.arguments = self.arguments
-            process.arguments?.append(contentsOf: pages.flatMap { $0.encode() })
-            process.arguments?.append("-")
+            #endif
+
+            process.arguments = arguments
             process.standardOutput = stdout
             
             if #available(macOS 10.13, *) {
