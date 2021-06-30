@@ -27,7 +27,7 @@ public struct WKHtml2Pdf {
     
     #if os(Linux)
     
-    public var useXvfb: Bool = false
+    public var useXvfb: Bool = true
     
     #endif
     
