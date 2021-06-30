@@ -25,7 +25,15 @@
 
 public struct WKHtml2Pdf {
     
+    #if os(macOS)
+    
     private static let binary_path = "/usr/local/bin/wkhtmltopdf"
+    
+    #elseif os(Linux)
+    
+    private static let binary_path = "/usr/bin/wkhtmltopdf"
+    
+    #endif
     
     public var paperSize: PaperSize?
     
