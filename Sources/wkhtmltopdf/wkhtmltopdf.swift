@@ -25,13 +25,7 @@
 
 public struct WKHtml2Pdf {
     
-    #if os(macOS)
-    
-    private static let binary_path = "/usr/local/bin/wkhtmltopdf"
-    
-    #elseif os(Linux)
-    
-    private static let binary_path = "/usr/bin/wkhtmltopdf"
+    #if os(Linux)
     
     public var useXvfb: Bool = false
     
@@ -99,17 +93,17 @@ extension WKHtml2Pdf {
             
             if useXvfb {
                 process.executableURL = URL(fileURLWithPath: "/usr/bin/xvfb-run")
-                arguments.insert(WKHtml2Pdf.binary_path, at: 0)
+                arguments.insert("/usr/bin/wkhtmltopdf", at: 0)
             } else {
-                process.executableURL = URL(fileURLWithPath: WKHtml2Pdf.binary_path)
+                process.executableURL = URL(fileURLWithPath: "/usr/bin/wkhtmltopdf")
             }
             
             #else
 
             if #available(macOS 10.13, *) {
-                process.executableURL = URL(fileURLWithPath: WKHtml2Pdf.binary_path)
+                process.executableURL = URL(fileURLWithPath: "/usr/local/bin/wkhtmltopdf")
             } else {
-                process.launchPath = WKHtml2Pdf.binary_path
+                process.launchPath = "/usr/local/bin/wkhtmltopdf"
             }
             
             #endif
