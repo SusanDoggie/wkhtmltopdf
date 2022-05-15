@@ -22,7 +22,7 @@ jobs:
       destination: ${{ matrix.destination }}
       enable_codecov: ${{ matrix.enable_codecov }}
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Install wkhtmltopdf
@@ -47,7 +47,7 @@ jobs:
       matrix:
         image: [xenial, bionic, focal]
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
       with:
         submodules: recursive
     - name: Prepare		
